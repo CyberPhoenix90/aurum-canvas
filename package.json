@@ -1,16 +1,16 @@
 {
 	"name": "aurum-canvas",
-	"version": "0.0.0",
+	"version": "0.0.2",
 	"description": "Aurum style scene graph management for rendering in canvas",
 	"main": "prebuilt/aurum-canvas.js",
-	"typings": "dist/aurum-canvas.d.ts",
+	"typings": "dist/aurum_canvas.d.ts",
 	"scripts": {
 		"build": "tsc",
 		"watch": "tsc -w",
 		"prepublish": "npm run deploy",
 		"test": "jest",
 		"generateDocs": "typedoc --json docs/docs.json --mode modules --excludePrivate --excludeProtected",
-		"deploy": "npm run build && npm run generateDocs && microbundle --no-compress --entry dist/aurum-canvas.js --output prebuilt --name aurum-canvas && microbundle --entry dist/aurum-canvas.js --output prebuilt_minified --name aurum-canvas"
+		"deploy": "npm run build && npm run generateDocs && microbundle --no-compress --entry dist/aurum_canvas.js --output prebuilt --name aurum-canvas && microbundle --entry dist/aurum_canvas.js --output prebuilt_minified --name aurum-canvas"
 	},
 	"homepage": "https://aurumjs.org/",
 	"repository": {
