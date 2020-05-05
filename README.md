@@ -16,3 +16,35 @@ Supports data sources for all attributes and dynamic scene graphs with array dat
 </AurumCanvas>
 
 ```
+
+Create canvas components just the way you create any aurum component:
+
+```
+function Triangle(props: { x: number; y: number }) {
+	const { x, y } = props;
+
+	return (
+		<AurumGroup x={x} y={y}>
+			<AurumLine lineWidth={3} strokeColor="red" x={0} y={0} tx={30} ty={30}></AurumLine>
+			<AurumLine lineWidth={3} strokeColor="red" x={30} y={30} tx={-30} ty={30}></AurumLine>
+			<AurumLine lineWidth={3} strokeColor="red" x={-30} y={30} tx={0} ty={0}></AurumLine>
+		</AurumGroup>
+	);
+}
+
+```
+
+
+Reuse components that weren't even intendet for use in the canvas:
+```
+<AurumCanvas width="200" height="200">
+	<Switch state={triangular}>
+		<SwitchCase when={true}>
+			<Triangle x={50} y={50}></Triangle>
+		</SwitchCase>
+		<SwitchCase when={false}>
+			<AurumRectangle x={50} y={50} fillColor="green" width={20} heigth={20}></AurumRectangle>
+		</SwitchCase>
+	</Switch>
+</AurumCanvas>
+```

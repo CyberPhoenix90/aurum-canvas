@@ -74,6 +74,13 @@ function render(canvas: HTMLCanvasElement, components: ComponentModel[]): void {
 }
 
 function renderChild(context: CanvasRenderingContext2D, child: ComponentModel, offsetX: number, offsetY: number): void {
+	if (Array.isArray(child)) {
+		for (const item of child) {
+			renderChild(context, item, offsetX, offsetY);
+		}
+		return;
+	}
+
 	if (child[aurumElementModelIdentitiy]) {
 		if (!renderCache.has(child)) {
 			renderCache.set(child, prerender(child));
@@ -108,7 +115,7 @@ function renderChild(context: CanvasRenderingContext2D, child: ComponentModel, o
 	}
 
 	for (const subChild of child.children) {
-		renderChild(context, subChild, deref(subChild.x) + offsetX, deref(subChild.y) + offsetY);
+		renderChild(context, subChild, deref(child.x) + offsetX, deref(child.y) + offsetY);
 	}
 }
 

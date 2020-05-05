@@ -12,5 +12,6 @@ export enum ComponentType {
 	ELIPSE,
 	LINE,
 	TEXT,
-	IMAGE
+	IMAGE,
+	GROUP
 }
