@@ -1,0 +1,42 @@
+{
+	"name": "aurum-canvas",
+	"version": "0.0.0",
+	"description": "Aurum style scene graph management for rendering in canvas",
+	"main": "prebuilt/aurum-canvas.js",
+	"typings": "dist/aurum-canvas.d.ts",
+	"scripts": {
+		"build": "tsc",
+		"watch": "tsc -w",
+		"prepublish": "npm run deploy",
+		"test": "jest",
+		"generateDocs": "typedoc --json docs/docs.json --mode modules --excludePrivate --excludeProtected",
+		"deploy": "npm run build && npm run generateDocs && microbundle --no-compress --entry dist/aurum-canvas.js --output prebuilt --name aurum-canvas && microbundle --entry dist/aurum-canvas.js --output prebuilt_minified --name aurum-canvas"
+	},
+	"homepage": "https://aurumjs.org/",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/CyberPhoenix90/aurum"
+	},
+	"keywords": [
+		"aurumjs",
+		"scenegraph",
+		"canvas",
+		"rendering"
+	],
+	"author": "Joao Santos (CyberPhoenix)",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/chai": "^4.2.5",
+		"@types/jest": "^24.0.23",
+		"chai": "^4.2.0",
+		"jest": "^24.9.0",
+		"microbundle": "^0.11.0",
+		"prettier": "^1.19.1",
+		"ts-jest": "^24.1.0",
+		"typedoc": "^0.15.4",
+		"typescript": "^3.7.2"
+	},
+	"dependencies": {
+		"aurumjs": "0.4.16"
+	}
+}
