@@ -6,10 +6,10 @@ Supports data sources for all attributes and dynamic scene graphs with array dat
 
 ```
 <AurumCanvas width="200" height="200">
-	<AurumRectangle x={a} y={20} fillColor="red" width={20} heigth={20}>
-		<AurumRectangle x={20} y={a} fillColor="blue" width={20} heigth={20}></AurumRectangle>
+	<AurumRectangle x={a} y={20} fillColor="red" width={20} height={20}>
+		<AurumRectangle x={20} y={a} fillColor="blue" width={20} height={20}></AurumRectangle>
 	</AurumRectangle>
-	<AurumRectangle x={50} y={50} fillColor="green" width={20} heigth={20}></AurumRectangle>
+	<AurumRectangle x={50} y={50} fillColor="green" width={20} height={20}></AurumRectangle>
 	<AurumText x={10} y={10} fillColor="black">
 		{name}
 	</AurumText>
@@ -35,7 +35,7 @@ function Triangle(props: { x: number; y: number }) {
 ```
 
 
-Reuse components that weren't even intendet for use in the canvas:
+Reuse components that weren't even intended for use in the canvas:
 ```
 <AurumCanvas width="200" height="200">
 	<Switch state={triangular}>
@@ -43,8 +43,28 @@ Reuse components that weren't even intendet for use in the canvas:
 			<Triangle x={50} y={50}></Triangle>
 		</SwitchCase>
 		<SwitchCase when={false}>
-			<AurumRectangle x={50} y={50} fillColor="green" width={20} heigth={20}></AurumRectangle>
+			<AurumRectangle x={50} y={50} fillColor="green" width={20} height={20}></AurumRectangle>
 		</SwitchCase>
 	</Switch>
 </AurumCanvas>
+```
+
+Declarative animation and interaction support
+```
+<AurumCanvas width="400" height="200">
+	<AurumRectangle
+		onMouseDown={(e, target) => {
+			state.update('highlight');
+		}}
+		state={state}
+		strokeColor="red"
+		x={0}
+		y={0}
+		width={30}
+		height={30}
+	>
+		<State opacity={1} id="highlight" width={300} transitionTime={2000}></State>
+	</AurumRectangle>
+</AurumCanvas>
+
 ```

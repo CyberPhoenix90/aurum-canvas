@@ -1,7 +1,9 @@
 import { DataSource, prerender } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
+import { InteractionProps } from '../common_props';
 
-export interface AurumGroupProps {
+export interface AurumGroupProps extends InteractionProps {
+	state?: string | DataSource<string>;
 	x: number | DataSource<number>;
 	y: number | DataSource<number>;
 }
@@ -12,7 +14,9 @@ export function AurumGroup(props: AurumGroupProps, children: ChildNode[]): Group
 	const components = children.map(prerender);
 	return {
 		...props,
+		renderedState: undefined,
 		children: components as any,
+		animations: [],
 		type: ComponentType.GROUP
 	};
 }

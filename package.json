@@ -15,7 +15,7 @@
 	"homepage": "https://aurumjs.org/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/CyberPhoenix90/aurum"
+		"url": "git+https://github.com/CyberPhoenix90/aurum-canvas"
 	},
 	"keywords": [
 		"aurumjs",
