@@ -3,6 +3,7 @@ import { ComponentModel } from './component_model';
 
 export interface CommonProps extends InteractionProps {
 	state?: string | DataSource<string>;
+	clip?: boolean | DataSource<boolean>;
 	originX?: number | DataSource<number>;
 	originY?: number | DataSource<number>;
 	x: number | DataSource<number>;

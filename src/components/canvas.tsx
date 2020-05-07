@@ -202,163 +202,179 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 			return;
 		}
 
+		context.save();
+		let idle: boolean;
 		switch (child.type) {
 			case ComponentType.PATH:
-				renderPath(context, child as PathComponentModel, offsetX, offsetY);
+				idle = renderPath(context, child as PathComponentModel, offsetX, offsetY);
 				break;
 			case ComponentType.RECTANGLE:
-				renderRectangle(context, child as RectangleComponentModel, offsetX, offsetY);
+				idle = renderRectangle(context, child as RectangleComponentModel, offsetX, offsetY);
 				break;
 			case ComponentType.TEXT:
-				renderText(context, child as TextComponentModel, offsetX, offsetY);
+				idle = renderText(context, child as TextComponentModel, offsetX, offsetY);
 				break;
 			case ComponentType.LINE:
-				renderLine(context, child as LineComponentModel, offsetX, offsetY);
+				idle = renderLine(context, child as LineComponentModel, offsetX, offsetY);
 				break;
 			case ComponentType.ELIPSE:
-				renderElipse(context, child as ElipseComponentModel, offsetX, offsetY);
+				idle = renderElipse(context, child as ElipseComponentModel, offsetX, offsetY);
 				break;
+		}
+		if (!idle) {
+			invalidate(context.canvas);
 		}
 
 		for (const subChild of child.children) {
 			renderChild(context, subChild, deref(child.x) + offsetX, deref(child.y) + offsetY);
 		}
-
-		function renderElipse(context: CanvasRenderingContext2D, child: ElipseComponentModel, offsetX: number, offsetY: number) {
-			const renderedState = resolveValues(
-				child,
-				['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'rotation', 'rx', 'ry', 'startAngle', 'endAngle'],
-				offsetX,
-				offsetY
-			);
-			const { x, y, idle, fillColor, strokeColor, opacity, rx, ry, rotation, startAngle, endAngle } = renderedState;
-			child.renderedState = renderedState;
-
-			if (!idle) {
-				invalidate(context.canvas);
-			}
-
-			context.globalAlpha = opacity;
-
-			if (fillColor || strokeColor) {
-				context.beginPath();
-				context.ellipse(x, y, rx, ry, rotation, startAngle ?? 0, endAngle ?? Math.PI * 2);
-			}
-
-			if (fillColor) {
-				context.fillStyle = fillColor;
-				context.fill();
-			}
-			if (child.strokeColor) {
-				context.strokeStyle = strokeColor;
-				context.stroke();
-			}
-		}
-
-		function renderLine(context: CanvasRenderingContext2D, child: LineComponentModel, offsetX: number, offsetY: number) {
-			const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'lineWidth'], offsetX, offsetY);
-			const { x, y, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
-			child.renderedState = renderedState;
-
-			if (!idle) {
-				invalidate(context.canvas);
-			}
-
-			context.globalAlpha = opacity;
-			if (fillColor || strokeColor) {
-				context.beginPath();
-				context.moveTo(x, y);
-				context.lineTo(tx, ty);
-				context.lineWidth = lineWidth;
-			}
-
-			if (child.fillColor) {
-				context.fillStyle = fillColor;
-				context.fill();
-			}
-			if (child.strokeColor) {
-				context.strokeStyle = strokeColor;
-				context.stroke();
-			}
-		}
-
-		function renderPath(context: CanvasRenderingContext2D, child: PathComponentModel, offsetX: number, offsetY: number) {
-			const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth'], offsetX, offsetY);
-			const { x, y, idle, fillColor, strokeColor, opacity, path, lineWidth } = renderedState;
-			child.renderedState = renderedState;
-
-			if (!idle) {
-				invalidate(context.canvas);
-			}
-
-			let path2d: Path2D;
-			context.globalAlpha = opacity;
-			if (fillColor || strokeColor) {
-				context.lineWidth = lineWidth;
-				path2d = new Path2D(path);
-			}
-
-			if (child.fillColor) {
-				context.translate(x, y);
-				context.fillStyle = fillColor;
-				context.fill(path2d);
-				context.translate(-x, -y);
-			}
-			if (child.strokeColor) {
-				context.translate(x, y);
-				context.strokeStyle = strokeColor;
-				context.stroke(path2d);
-				context.translate(-x, -y);
-			}
-		}
-
-		function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number) {
-			const renderedState = resolveValues(
-				child,
-				['x', 'y', 'width', 'height', 'font', 'fontSize', 'opacity', 'strokeColor', 'fillColor', 'text'],
-				offsetX,
-				offsetY
-			);
-			const { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text } = renderedState;
-			child.renderedState = renderedState;
-
-			if (!idle) {
-				invalidate(context.canvas);
-			}
-
-			context.globalAlpha = opacity;
-			context.font = `${fontSize}px ${font ?? 'Arial'}`;
-			if (fillColor) {
-				context.fillStyle = fillColor;
-				context.fillText(text, x, y);
-			}
-			if (strokeColor) {
-				context.strokeStyle = strokeColor;
-				context.strokeText(text, x, y);
-			}
-		}
-
-		function renderRectangle(context: CanvasRenderingContext2D, child: RectangleComponentModel, offsetX: number, offsetY: number) {
-			const renderedState = resolveValues(child, ['x', 'y', 'width', 'height', 'opacity', 'strokeColor', 'fillColor'], offsetX, offsetY);
-			const { x, y, width, height, idle, fillColor, strokeColor, opacity } = renderedState;
-			child.renderedState = renderedState;
-
-			if (!idle) {
-				invalidate(context.canvas);
-			}
-
-			context.globalAlpha = opacity;
-
-			if (fillColor) {
-				context.fillStyle = fillColor;
-				context.fillRect(x, y, width, height);
-			}
-			if (strokeColor) {
-				context.strokeStyle = strokeColor;
-				context.strokeRect(x, y, width, height);
-			}
-		}
+		context.restore();
 	}
+}
+
+function renderElipse(context: CanvasRenderingContext2D, child: ElipseComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(
+		child,
+		['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'rotation', 'rx', 'ry', 'startAngle', 'endAngle'],
+		offsetX,
+		offsetY
+	);
+	const { x, y, idle, fillColor, strokeColor, opacity, rx, ry, rotation, startAngle, endAngle } = renderedState;
+	child.renderedState = renderedState;
+
+	context.globalAlpha = opacity;
+
+	if (fillColor || strokeColor) {
+		context.beginPath();
+		context.ellipse(x, y, rx, ry, rotation, startAngle ?? 0, endAngle ?? Math.PI * 2);
+	}
+
+	if (fillColor) {
+		context.fillStyle = fillColor;
+		context.fill();
+	}
+	if (child.strokeColor) {
+		context.strokeStyle = strokeColor;
+		context.stroke();
+	}
+
+	if (child.clip) {
+		context.clip();
+	}
+
+	return idle;
+}
+
+function renderLine(context: CanvasRenderingContext2D, child: LineComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'lineWidth'], offsetX, offsetY);
+	const { x, y, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
+	child.renderedState = renderedState;
+
+	context.globalAlpha = opacity;
+	if (fillColor || strokeColor) {
+		context.beginPath();
+		context.moveTo(x, y);
+		context.lineTo(tx, ty);
+		context.lineWidth = lineWidth;
+	}
+
+	if (child.fillColor) {
+		context.fillStyle = fillColor;
+		context.fill();
+	}
+	if (child.strokeColor) {
+		context.strokeStyle = strokeColor;
+		context.stroke();
+	}
+
+	if (child.clip) {
+		context.clip();
+	}
+
+	return idle;
+}
+
+function renderPath(context: CanvasRenderingContext2D, child: PathComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth'], offsetX, offsetY);
+	const { x, y, idle, fillColor, strokeColor, opacity, path, lineWidth } = renderedState;
+	child.renderedState = renderedState;
+
+	let path2d: Path2D;
+	context.globalAlpha = opacity;
+	if (fillColor || strokeColor) {
+		context.lineWidth = lineWidth;
+		path2d = new Path2D(path);
+	}
+
+	if (child.fillColor) {
+		context.translate(x, y);
+		context.fillStyle = fillColor;
+		context.fill(path2d);
+		context.translate(-x, -y);
+	}
+	if (child.strokeColor) {
+		context.translate(x, y);
+		context.strokeStyle = strokeColor;
+		context.stroke(path2d);
+		context.translate(-x, -y);
+	}
+
+	if (child.clip) {
+		context.translate(x, y);
+		context.clip(path2d);
+		context.translate(-x, -y);
+	}
+
+	return idle;
+}
+
+function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(
+		child,
+		['x', 'y', 'width', 'height', 'font', 'fontSize', 'opacity', 'strokeColor', 'fillColor', 'text'],
+		offsetX,
+		offsetY
+	);
+	const { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text } = renderedState;
+	child.renderedState = renderedState;
+
+	context.globalAlpha = opacity;
+	context.font = `${fontSize}px ${font ?? 'Arial'}`;
+	if (fillColor) {
+		context.fillStyle = fillColor;
+		context.fillText(text, x, y);
+	}
+	if (strokeColor) {
+		context.strokeStyle = strokeColor;
+		context.strokeText(text, x, y);
+	}
+
+	return idle;
+}
+
+function renderRectangle(context: CanvasRenderingContext2D, child: RectangleComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(child, ['x', 'y', 'width', 'height', 'opacity', 'strokeColor', 'fillColor'], offsetX, offsetY);
+	const { x, y, width, height, idle, fillColor, strokeColor, opacity } = renderedState;
+	child.renderedState = renderedState;
+
+	context.globalAlpha = opacity;
+
+	if (fillColor) {
+		context.fillStyle = fillColor;
+		context.fillRect(x, y, width, height);
+	}
+	if (strokeColor) {
+		context.strokeStyle = strokeColor;
+		context.strokeRect(x, y, width, height);
+	}
+
+	if (child.clip) {
+		context.beginPath();
+		context.rect(x, y, width, height);
+		context.clip();
+	}
+
+	return idle;
 }
 
 function resolveValues(node: ComponentModel, props: string[], offsetX: number, offsetY: number): any {

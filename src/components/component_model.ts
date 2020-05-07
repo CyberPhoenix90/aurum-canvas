@@ -5,6 +5,7 @@ import { InteractionProps } from './common_props';
 export interface ComponentModel extends InteractionProps {
 	type: ComponentType;
 	state?: string | DataSource<string>;
+	clip?: boolean | DataSource<boolean>;
 	x: number | DataSource<number>;
 	y: number | DataSource<number>;
 	children: ComponentModel[];
