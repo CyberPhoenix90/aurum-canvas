@@ -92,7 +92,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 				child.listen(() => {
 					invalidate(canvas);
 				});
-				return;
+				continue;
 			}
 
 			if (child[stateSymbol]) {
@@ -100,7 +100,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 					throw new Error('Cannot use <State> nodes at root level');
 				}
 				parent.animations.push(child as StateComponentModel);
-				return;
+				continue;
 			}
 
 			for (const key in child) {
