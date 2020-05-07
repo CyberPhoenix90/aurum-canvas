@@ -41,5 +41,6 @@ export enum ComponentType {
 	TEXT,
 	IMAGE,
 	GROUP,
-	STATE
+	STATE,
+	PATH
 }

@@ -16,6 +16,7 @@ import { LineComponentModel } from './drawables/aurum_line';
 import { ElipseComponentModel } from './drawables/aurum_elipse';
 import { stateSymbol, StateComponentModel } from './drawables/state';
 import { EventEmitter } from 'aurumjs/dist/utilities/event_emitter';
+import { PathComponentModel } from './drawables/aurum_path';
 
 const renderCache = new WeakMap();
 export interface AurumCanvasProps {
@@ -202,6 +203,9 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 		}
 
 		switch (child.type) {
+			case ComponentType.PATH:
+				renderPath(context, child as PathComponentModel, offsetX, offsetY);
+				break;
 			case ComponentType.RECTANGLE:
 				renderRectangle(context, child as RectangleComponentModel, offsetX, offsetY);
 				break;
@@ -275,6 +279,36 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 			if (child.strokeColor) {
 				context.strokeStyle = strokeColor;
 				context.stroke();
+			}
+		}
+
+		function renderPath(context: CanvasRenderingContext2D, child: PathComponentModel, offsetX: number, offsetY: number) {
+			const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth'], offsetX, offsetY);
+			const { x, y, idle, fillColor, strokeColor, opacity, path, lineWidth } = renderedState;
+			child.renderedState = renderedState;
+
+			if (!idle) {
+				invalidate(context.canvas);
+			}
+
+			let path2d: Path2D;
+			context.globalAlpha = opacity;
+			if (fillColor || strokeColor) {
+				context.lineWidth = lineWidth;
+				path2d = new Path2D(path);
+			}
+
+			if (child.fillColor) {
+				context.translate(x, y);
+				context.fillStyle = fillColor;
+				context.fill(path2d);
+				context.translate(-x, -y);
+			}
+			if (child.strokeColor) {
+				context.translate(x, y);
+				context.strokeStyle = strokeColor;
+				context.stroke(path2d);
+				context.translate(-x, -y);
 			}
 		}
 
