@@ -1,6 +1,6 @@
-import { DataSource, prerender } from 'aurumjs';
-import { ComponentModel, ComponentType } from '../component_model';
+import { AurumComponentAPI, DataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
+import { ComponentModel, ComponentType } from '../component_model';
 
 export interface AurumLineProps extends CommonProps {
 	tx: number | DataSource<number>;
@@ -17,8 +17,8 @@ export interface LineComponentModel extends ComponentModel {
 	lineWidth?: number | DataSource<number>;
 }
 
-export function AurumLine(props: AurumLineProps, children: ChildNode[]): LineComponentModel {
-	const components = children.map(prerender);
+export function AurumLine(props: AurumLineProps, children: Renderable[], api: AurumComponentAPI): LineComponentModel {
+	const components = api.prerender(children);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

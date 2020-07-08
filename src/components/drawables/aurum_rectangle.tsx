@@ -1,6 +1,6 @@
-import { DataSource, prerender } from 'aurumjs';
-import { ComponentModel, ComponentType } from '../component_model';
+import { AurumComponentAPI, DataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
+import { ComponentModel, ComponentType } from '../component_model';
 
 export interface AurumRectangleProps extends CommonProps {
 	width: number | DataSource<number>;
@@ -15,8 +15,8 @@ export interface RectangleComponentModel extends ComponentModel {
 	height: number | DataSource<number>;
 }
 
-export function AurumRectangle(props: AurumRectangleProps, children: ChildNode[]): RectangleComponentModel {
-	const components = children.map(prerender);
+export function AurumRectangle(props: AurumRectangleProps, children: Renderable[], api: AurumComponentAPI): RectangleComponentModel {
+	const components = api.prerender(children);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

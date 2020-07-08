@@ -1,6 +1,6 @@
-import { DataSource, prerender, ReadOnlyDataSource } from 'aurumjs';
-import { ComponentModel, ComponentType } from '../component_model';
+import { AurumComponentAPI, DataSource, ReadOnlyDataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
+import { ComponentModel, ComponentType } from '../component_model';
 
 export interface AurumTexteProps extends CommonProps {
 	font?: string | DataSource<string>;
@@ -16,8 +16,8 @@ export interface TextComponentModel extends ComponentModel {
 	opacity?: number | DataSource<number>;
 }
 
-export function AurumText(props: AurumTexteProps, children: ChildNode[]): TextComponentModel {
-	const content = children.map(prerender);
+export function AurumText(props: AurumTexteProps, children: Renderable[], api: AurumComponentAPI): TextComponentModel {
+	const content = api.prerender(children);
 	const text = new DataSource('');
 
 	for (const i of content as Array<string | ReadOnlyDataSource<string>>) {

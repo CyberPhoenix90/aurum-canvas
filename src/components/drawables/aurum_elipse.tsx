@@ -1,4 +1,4 @@
-import { DataSource, prerender } from 'aurumjs';
+import { DataSource, Renderable, AurumComponentAPI } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
 import { CommonProps } from '../common_props';
 
@@ -20,8 +20,8 @@ export interface ElipseComponentModel extends ComponentModel {
 	endAngle?: number | DataSource<number>;
 }
 
-export function AurumElipse(props: AurumElipseProps, children: ChildNode[]): ElipseComponentModel {
-	const components = children.map(prerender);
+export function AurumElipse(props: AurumElipseProps, children: Renderable[], api: AurumComponentAPI): ElipseComponentModel {
+	const components = api.prerender(children);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

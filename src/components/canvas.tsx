@@ -1,13 +1,14 @@
 import {
 	AurumElement,
-	ChildNode,
 	Aurum,
 	DataSource,
-	prerender,
 	ArrayDataSource,
 	DuplexDataSource,
 	aurumElementModelIdentitiy,
-	CancellationToken
+	CancellationToken,
+	Renderable,
+	AurumComponentAPI,
+	EventEmitter
 } from 'aurumjs';
 import { ComponentModel, ComponentType } from './component_model';
 import { RectangleComponentModel } from './drawables/aurum_rectangle';
@@ -15,20 +16,23 @@ import { TextComponentModel } from './drawables/aurum_text';
 import { LineComponentModel } from './drawables/aurum_line';
 import { ElipseComponentModel } from './drawables/aurum_elipse';
 import { stateSymbol, StateComponentModel } from './drawables/state';
-import { EventEmitter } from 'aurumjs/dist/utilities/event_emitter';
 import { PathComponentModel } from './drawables/aurum_path';
 
 const renderCache = new WeakMap();
 export interface AurumCanvasProps {
 	backgroundColor?: DataSource<string> | string;
+	onAttach?(canvas: HTMLCanvasElement): void;
+	onDetach?(): void;
 	class?: DataSource<string> | string;
 	style?: DataSource<string> | string;
 	width?: DataSource<string> | string;
 	height?: DataSource<string> | string;
+	translate?: DataSource<{ x: number; y: number }>;
+	scale?: DataSource<{ x: number; y: number }>;
 }
 
-export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): AurumElement {
-	const components = children.map(prerender);
+export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api: AurumComponentAPI): AurumElement {
+	const components = api.prerender(children);
 	let pendingRerender;
 	const cancellationToken: CancellationToken = new CancellationToken();
 	let onMouseMove: EventEmitter<MouseEvent> = new EventEmitter();
@@ -40,9 +44,11 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 			onAttach={(canvas) => {
 				bindCanvas(canvas, components as any, cancellationToken);
 				render(canvas, components as any);
+				props.onAttach?.(canvas);
 			}}
 			onDetach={() => {
 				cancellationToken.cancel();
+				props.onDetach?.();
 			}}
 			class={props.class}
 			width={props.width}
@@ -167,8 +173,20 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 	function render(canvas: HTMLCanvasElement, components: ComponentModel[]): void {
 		const context = canvas.getContext('2d');
 		context.clearRect(0, 0, canvas.width, canvas.height);
+		if (props.scale || props.translate) {
+			context.save();
+			if (props.scale?.value) {
+				context.scale(props.scale.value.x, props.scale.value.y);
+			}
+			if (props.translate?.value) {
+				context.scale(props.translate.value.x, props.translate.value.y);
+			}
+		}
 		for (const child of components) {
 			renderChild(context, child, 0, 0);
+		}
+		if (props.scale || props.translate) {
+			context.restore();
 		}
 	}
 
@@ -186,7 +204,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: ChildNode[]): Aur
 
 		if (child[aurumElementModelIdentitiy]) {
 			if (!renderCache.has(child)) {
-				renderCache.set(child, prerender(child));
+				renderCache.set(child, api.prerender(child as any));
 			}
 			child = renderCache.get(child);
 		}

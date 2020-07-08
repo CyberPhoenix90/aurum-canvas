@@ -1,4 +1,4 @@
-import { DataSource, prerender } from 'aurumjs';
+import { DataSource, Renderable, AurumComponentAPI } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
 export const stateSymbol = Symbol('state');
 
@@ -43,8 +43,8 @@ export interface StateComponentModel extends ComponentModel {
 	font?: string | DataSource<string>;
 }
 
-export function State(props: StateProps, children: ChildNode[]): StateComponentModel {
-	const components = children.map(prerender);
+export function State(props: StateProps, children: Renderable[], api: AurumComponentAPI): StateComponentModel {
+	const components = api.prerender(children);
 	return {
 		[stateSymbol]: true,
 		x: undefined,

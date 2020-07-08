@@ -1,4 +1,4 @@
-import { DataSource, prerender } from 'aurumjs';
+import { DataSource, Renderable, AurumComponentAPI } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
 import { CommonProps } from '../common_props';
 
@@ -15,8 +15,8 @@ export interface PathComponentModel extends ComponentModel {
 	lineWidth?: number | DataSource<number>;
 }
 
-export function AurumPath(props: AurumPathProps, children: ChildNode[]): PathComponentModel {
-	const components = children.map(prerender);
+export function AurumPath(props: AurumPathProps, children: Renderable[], api: AurumComponentAPI): PathComponentModel {
+	const components = api.prerender(children);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,
