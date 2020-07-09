@@ -26,16 +26,51 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 	const content = api.prerender(children).filter((c) => !!c);
 	const text = new DataSource('');
 
+	if (props.font instanceof DataSource) {
+		props.font.listen(() => {
+			if (result.renderedState) {
+				result.renderedState.lines = [];
+			}
+		});
+	}
+
+	if (props.fontWeight instanceof DataSource) {
+		props.fontWeight.listen(() => {
+			if (result.renderedState) {
+				result.renderedState.lines = [];
+			}
+		});
+	}
+
+	if (props.fontSize instanceof DataSource) {
+		props.fontSize.listen(() => {
+			if (result.renderedState) {
+				result.renderedState.lines = [];
+			}
+		});
+	}
+
+	if (props.wrapWidth instanceof DataSource) {
+		props.wrapWidth.listen(() => {
+			if (result.renderedState) {
+				result.renderedState.lines = [];
+			}
+		});
+	}
+
 	for (const i of content as Array<string | ReadOnlyDataSource<string>>) {
 		if (i instanceof DataSource) {
 			i.unique().listen((v) => {
+				if (result.renderedState) {
+					result.renderedState.lines = [];
+				}
 				updateText(text, content as any);
 			});
 		}
 	}
 	updateText(text, content as any);
 
-	return {
+	const result = {
 		...props,
 		opacity: props.opacity ?? 1,
 		renderedState: undefined,
@@ -44,6 +79,7 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 		animations: [],
 		type: ComponentType.TEXT
 	};
+	return result;
 }
 
 function updateText(text: DataSource<string>, content: Array<string | ReadOnlyDataSource<string>>) {

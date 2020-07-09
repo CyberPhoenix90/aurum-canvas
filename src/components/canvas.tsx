@@ -367,26 +367,30 @@ function renderText(context: CanvasRenderingContext2D, child: TextComponentModel
 		offsetY
 	);
 	const { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text, fontWeight, wrapWidth, lineHeight } = renderedState;
+	renderedState.lines = child.renderedState?.lines;
 	child.renderedState = renderedState;
 
 	context.globalAlpha = opacity;
 	context.font = `${fontWeight ? fontWeight + ' ' : ''}${fontSize}px ${font ?? 'Arial'}`;
 
-	let lines = [];
-	if (wrapWidth) {
-		const pieces: string[] = text.split(' ');
-		let line = pieces.shift();
-		while (pieces.length) {
-			if (context.measureText(line + ' ' + pieces[0]).width <= wrapWidth) {
-				line += ' ' + pieces.shift();
-			} else {
-				lines.push(line);
-				line = pieces.shift();
+	child.renderedState.lines = child.renderedState.lines ?? [];
+	let lines = child.renderedState.lines;
+	if (lines.length === 0) {
+		if (wrapWidth) {
+			const pieces: string[] = text.split(' ');
+			let line = pieces.shift();
+			while (pieces.length) {
+				if (context.measureText(line + ' ' + pieces[0]).width <= wrapWidth) {
+					line += ' ' + pieces.shift();
+				} else {
+					lines.push(line);
+					line = pieces.shift();
+				}
 			}
+			lines.push(line);
+		} else {
+			lines.push(text);
 		}
-		lines.push(line);
-	} else {
-		lines.push(text);
 	}
 
 	for (let i = 0; i < lines.length; i++) {

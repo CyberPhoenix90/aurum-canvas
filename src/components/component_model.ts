@@ -16,6 +16,7 @@ export interface ComponentModel extends InteractionProps {
 }
 
 export interface RenderData {
+	lines: string[];
 	x: number;
 	y: number;
 	width?: number;
