@@ -21,7 +21,7 @@ export interface ElipseComponentModel extends ComponentModel {
 }
 
 export function AurumElipse(props: AurumElipseProps, children: Renderable[], api: AurumComponentAPI): ElipseComponentModel {
-	const components = api.prerender(children);
+	const components = api.prerender(children).filter((c) => !!c);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

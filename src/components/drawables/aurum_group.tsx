@@ -11,7 +11,7 @@ export interface AurumGroupProps extends InteractionProps {
 export interface GroupComponentModel extends ComponentModel {}
 
 export function AurumGroup(props: AurumGroupProps, children: Renderable[], api: AurumComponentAPI): GroupComponentModel {
-	const components = api.prerender(children);
+	const components = api.prerender(children).filter((c) => !!c);
 	return {
 		...props,
 		renderedState: undefined,

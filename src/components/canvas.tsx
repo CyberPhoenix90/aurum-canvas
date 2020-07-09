@@ -44,6 +44,16 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 			onAttach={(canvas) => {
 				bindCanvas(canvas, components as any, cancellationToken);
 				render(canvas, components as any);
+				if (props.translate) {
+					props.translate.listen((v) => {
+						invalidate(canvas);
+					});
+				}
+				if (props.translate) {
+					props.scale.listen((v) => {
+						invalidate(canvas);
+					});
+				}
 				props.onAttach?.(canvas);
 			}}
 			onDetach={() => {
@@ -179,7 +189,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 				context.scale(props.scale.value.x, props.scale.value.y);
 			}
 			if (props.translate?.value) {
-				context.scale(props.translate.value.x, props.translate.value.y);
+				context.translate(props.translate.value.x, props.translate.value.y);
 			}
 		}
 		for (const child of components) {
@@ -237,6 +247,9 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 				break;
 			case ComponentType.ELIPSE:
 				idle = renderElipse(context, child as ElipseComponentModel, offsetX, offsetY);
+				break;
+			case ComponentType.GROUP:
+				idle = true;
 				break;
 		}
 		if (!idle) {
@@ -349,22 +362,42 @@ function renderPath(context: CanvasRenderingContext2D, child: PathComponentModel
 function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number): boolean {
 	const renderedState = resolveValues(
 		child,
-		['x', 'y', 'width', 'height', 'font', 'fontSize', 'opacity', 'strokeColor', 'fillColor', 'text'],
+		['x', 'y', 'width', 'height', 'font', 'fontSize', 'opacity', 'strokeColor', 'fillColor', 'text', 'fontWeight', 'wrapWidth', 'lineHeight'],
 		offsetX,
 		offsetY
 	);
-	const { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text } = renderedState;
+	const { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text, fontWeight, wrapWidth, lineHeight } = renderedState;
 	child.renderedState = renderedState;
 
 	context.globalAlpha = opacity;
-	context.font = `${fontSize}px ${font ?? 'Arial'}`;
-	if (fillColor) {
-		context.fillStyle = fillColor;
-		context.fillText(text, x, y);
+	context.font = `${fontWeight ? fontWeight + ' ' : ''}${fontSize}px ${font ?? 'Arial'}`;
+
+	let lines = [];
+	if (wrapWidth) {
+		const pieces: string[] = text.split(' ');
+		let line = pieces.shift();
+		while (pieces.length) {
+			if (context.measureText(line + ' ' + pieces[0]).width <= wrapWidth) {
+				line += ' ' + pieces.shift();
+			} else {
+				lines.push(line);
+				line = pieces.shift();
+			}
+		}
+		lines.push(line);
+	} else {
+		lines.push(text);
 	}
-	if (strokeColor) {
-		context.strokeStyle = strokeColor;
-		context.strokeText(text, x, y);
+
+	for (let i = 0; i < lines.length; i++) {
+		if (fillColor) {
+			context.fillStyle = fillColor;
+			context.fillText(lines[i], x, y + (lineHeight ?? 16) * i);
+		}
+		if (strokeColor) {
+			context.strokeStyle = strokeColor;
+			context.strokeText(lines[i], x, y + (lineHeight ?? 16) * i);
+		}
 	}
 
 	return idle;

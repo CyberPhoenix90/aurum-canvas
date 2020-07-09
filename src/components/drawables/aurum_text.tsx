@@ -5,6 +5,9 @@ import { ComponentModel, ComponentType } from '../component_model';
 export interface AurumTexteProps extends CommonProps {
 	font?: string | DataSource<string>;
 	fontSize?: number | DataSource<number>;
+	fontWeight?: string | DataSource<string>;
+	wrapWidth?: number | DataSource<number>;
+	lineHeight?: number | DataSource<number>;
 }
 
 export interface TextComponentModel extends ComponentModel {
@@ -12,12 +15,15 @@ export interface TextComponentModel extends ComponentModel {
 	font?: string | DataSource<string>;
 	fontSize?: number | DataSource<number>;
 	strokeColor?: string | DataSource<string>;
+	fontWeight?: string | DataSource<string>;
 	fillColor?: string | DataSource<string>;
 	opacity?: number | DataSource<number>;
+	wrapWidth?: number | DataSource<number>;
+	lineHeight?: number | DataSource<number>;
 }
 
 export function AurumText(props: AurumTexteProps, children: Renderable[], api: AurumComponentAPI): TextComponentModel {
-	const content = api.prerender(children);
+	const content = api.prerender(children).filter((c) => !!c);
 	const text = new DataSource('');
 
 	for (const i of content as Array<string | ReadOnlyDataSource<string>>) {

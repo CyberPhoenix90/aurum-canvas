@@ -16,7 +16,7 @@ export interface RectangleComponentModel extends ComponentModel {
 }
 
 export function AurumRectangle(props: AurumRectangleProps, children: Renderable[], api: AurumComponentAPI): RectangleComponentModel {
-	const components = api.prerender(children);
+	const components = api.prerender(children).filter((c) => !!c);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

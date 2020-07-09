@@ -18,7 +18,7 @@ export interface LineComponentModel extends ComponentModel {
 }
 
 export function AurumLine(props: AurumLineProps, children: Renderable[], api: AurumComponentAPI): LineComponentModel {
-	const components = api.prerender(children);
+	const components = api.prerender(children).filter((c) => !!c);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,
