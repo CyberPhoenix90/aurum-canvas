@@ -1,4 +1,4 @@
-import { AurumComponentAPI, DataSource, ReadOnlyDataSource, Renderable } from 'aurumjs';
+import { AurumComponentAPI, DataSource, dsUnique, ReadOnlyDataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
 import { ComponentModel, ComponentType } from '../component_model';
 
@@ -60,7 +60,7 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 
 	for (const i of content as Array<string | ReadOnlyDataSource<string>>) {
 		if (i instanceof DataSource) {
-			i.unique().listen((v) => {
+			i.transform(dsUnique()).listen((v) => {
 				if (result.renderedState) {
 					result.renderedState.lines = [];
 				}
