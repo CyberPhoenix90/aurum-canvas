@@ -18,6 +18,29 @@ import { ElipseComponentModel } from './drawables/aurum_elipse';
 import { stateSymbol, StateComponentModel } from './drawables/state';
 import { PathComponentModel } from './drawables/aurum_path';
 
+export interface AurumnCanvasFeatures {
+	mouseWheelZoom?: {
+		zoomIncrements: number;
+		maxZoom: number;
+		minZoom: number;
+	},
+	panning?: {
+		// minX?: number;
+		// minY?: number;
+		// maxX?: number;
+		// maxY?: number;
+		mouse: boolean;
+		keyboard?: {
+			upKeyCode: number;
+			rightKeyCode: number;
+			leftKeyCode: number;
+			downKeyCode: number;
+			pixelsPerFrame: number;
+		}
+
+	},
+}
+
 const renderCache = new WeakMap();
 export interface AurumCanvasProps {
 	backgroundColor?: DataSource<string> | string;
@@ -29,6 +52,7 @@ export interface AurumCanvasProps {
 	height?: DataSource<string> | string;
 	translate?: DataSource<{ x: number; y: number }>;
 	scale?: DataSource<{ x: number; y: number }>;
+	features?: AurumnCanvasFeatures;
 }
 
 export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api: AurumComponentAPI): AurumElement {
@@ -42,6 +66,44 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 	return (
 		<canvas
 			onAttach={(canvas) => {
+				if (props.features) {
+					if (!props.scale) {
+						props.scale = new DataSource({ x: 1, y: 1 });
+					}
+
+					if (!props.translate) {
+						props.translate = new DataSource({ x: 0, y: 0 });
+					}
+
+					if (props.features.mouseWheelZoom) {
+						initializeZoomFeature(props, canvas);
+					}
+					if (props.features.panning?.mouse) {
+						initializeMousePanningFeature(props, canvas);
+					}
+					if (props.features.panning?.keyboard) {
+						initializeKeyboardPanningFeature(props, canvas);
+					}
+				}
+
+				if (props.width instanceof DataSource) {
+					props.width.listen(() => {
+						invalidate(canvas);
+					}, api.cancellationToken)
+				}
+
+				if (props.backgroundColor instanceof DataSource) {
+					props.backgroundColor.listen(() => {
+						invalidate(canvas);
+					}, api.cancellationToken)
+				}
+
+				if (props.height instanceof DataSource) {
+					props.height.listen(() => {
+						invalidate(canvas);
+					}, api.cancellationToken)
+				}
+
 				bindCanvas(canvas, components as any, cancellationToken);
 				render(canvas, components as any);
 				if (props.translate) {
@@ -60,6 +122,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 				cancellationToken.cancel();
 				props.onDetach?.();
 			}}
+			style={props.style}
 			class={props.class}
 			width={props.width}
 			height={props.height}
@@ -181,8 +244,14 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 	}
 
 	function render(canvas: HTMLCanvasElement, components: ComponentModel[]): void {
+
 		const context = canvas.getContext('2d');
-		context.clearRect(0, 0, canvas.width, canvas.height);
+		if (props.backgroundColor === undefined) {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+		} else {
+			context.fillStyle = deref(props.backgroundColor);
+			context.fillRect(0, 0, canvas.width, canvas.height)
+		}
 		if (props.scale || props.translate) {
 			context.save();
 			if (props.scale?.value) {
@@ -261,6 +330,126 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 		}
 		context.restore();
 	}
+}
+
+function initializeKeyboardPanningFeature(props: AurumCanvasProps, canvas: HTMLCanvasElement): void {
+	let moveToken: CancellationToken;
+	const keyDown = new Set();
+	const moveVector = {
+		x: 0,
+		y: 0
+	};
+
+	window.addEventListener('keyup', e => {
+		if (e.keyCode === props.features.panning.keyboard.leftKeyCode || e.keyCode === props.features.panning.keyboard.rightKeyCode) {
+			moveVector.x = 0;
+			keyDown.delete(e.keyCode);
+		}
+
+		if (e.keyCode === props.features.panning.keyboard.upKeyCode || e.keyCode === props.features.panning.keyboard.downKeyCode) {
+			moveVector.y = 0;
+			keyDown.delete(e.keyCode);
+		}
+
+		if (moveToken && keyDown.size === 0) {
+			moveToken.cancel();
+			moveToken = undefined;
+		}
+	});
+
+	window.addEventListener('keydown', e => {
+		if (e.keyCode === props.features.panning.keyboard.leftKeyCode) {
+			moveVector.x = -props.features.panning.keyboard.pixelsPerFrame;
+			keyDown.add(e.keyCode);
+		}
+
+		if (e.keyCode === props.features.panning.keyboard.downKeyCode) {
+			moveVector.y = props.features.panning.keyboard.pixelsPerFrame;
+			keyDown.add(e.keyCode);
+		}
+
+		if (e.keyCode === props.features.panning.keyboard.rightKeyCode) {
+			moveVector.x = props.features.panning.keyboard.pixelsPerFrame;
+			keyDown.add(e.keyCode);
+		}
+
+		if (e.keyCode === props.features.panning.keyboard.upKeyCode) {
+			moveVector.y = -props.features.panning.keyboard.pixelsPerFrame;
+			keyDown.add(e.keyCode);
+		}
+
+		if (!moveToken && keyDown.size > 0) {
+			moveToken = new CancellationToken();
+			moveToken.animationLoop(() => {
+				props.translate.update({
+					x: props.translate.value.x + moveVector.x / props.scale.value.x,
+					y: props.translate.value.y + moveVector.y / props.scale.value.x
+				});
+			});
+		}
+	});
+
+}
+
+function initializeMousePanningFeature(props: AurumCanvasProps, canvas: HTMLCanvasElement): void {
+	let downX: number;
+	let downY: number;
+	let beforeX: number;
+	let beforeY: number;
+	let down: boolean = false;
+
+	canvas.addEventListener('mousedown', e => {
+		downX = e.clientX;
+		downY = e.clientY;
+		beforeX = props.translate.value.x;
+		beforeY = props.translate.value.y;
+		down = true;
+	});
+
+	document.addEventListener('mousemove', e => {
+		if (down) {
+			props.translate.update({
+				x: beforeX - (downX - e.clientX) / props.scale.value.x,
+				y: beforeY - (downY - e.clientY) / props.scale.value.y
+			});
+		}
+	});
+
+	document.addEventListener('mouseup', e => {
+		down = false;
+	});
+}
+
+function initializeZoomFeature(props: AurumCanvasProps, canvas: HTMLCanvasElement): void {
+	canvas.addEventListener('wheel', e => {
+		if (e.deltaY > 0) {
+			if (props.scale.value.x < props.features.mouseWheelZoom.minZoom) {
+				return;
+			}
+
+			props.translate.update({
+				x: props.translate.value.x + (e.clientX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
+				y: props.translate.value.y + (e.clientY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
+			});
+			props.scale.update({
+				x: props.scale.value.x / props.features.mouseWheelZoom.zoomIncrements,
+				y: props.scale.value.y / props.features.mouseWheelZoom.zoomIncrements
+			});
+		} else {
+			if (props.scale.value.x > props.features.mouseWheelZoom.maxZoom) {
+				return;
+			}
+
+			props.scale.update({
+				x: props.scale.value.x * props.features.mouseWheelZoom.zoomIncrements,
+				y: props.scale.value.y * props.features.mouseWheelZoom.zoomIncrements
+			});
+			props.translate.update({
+				x: props.translate.value.x - (e.clientX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
+				y: props.translate.value.y - (e.clientY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
+			});
+		}
+	});
 }
 
 function renderElipse(context: CanvasRenderingContext2D, child: ElipseComponentModel, offsetX: number, offsetY: number): boolean {
