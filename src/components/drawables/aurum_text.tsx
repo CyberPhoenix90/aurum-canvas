@@ -1,4 +1,4 @@
-import { AurumComponentAPI, DataSource, dsUnique, ReadOnlyDataSource, Renderable } from 'aurumjs';
+import { AurumComponentAPI, createLifeCycle, DataSource, dsUnique, ReadOnlyDataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
 import { ComponentModel, ComponentType } from '../component_model';
 
@@ -6,6 +6,7 @@ export interface AurumTexteProps extends CommonProps {
 	font?: string | DataSource<string>;
 	fontSize?: number | DataSource<number>;
 	fontWeight?: string | DataSource<string>;
+	width?: number | DataSource<number>;
 	wrapWidth?: number | DataSource<number>;
 	lineHeight?: number | DataSource<number>;
 }
@@ -23,7 +24,10 @@ export interface TextComponentModel extends ComponentModel {
 }
 
 export function AurumText(props: AurumTexteProps, children: Renderable[], api: AurumComponentAPI): TextComponentModel {
-	const content = api.prerender(children).filter((c) => !!c);
+	const lc = createLifeCycle();
+	api.synchronizeLifeCycle(lc);
+
+	const content = api.prerender(children, lc).filter((c) => !!c);
 	const text = new DataSource('');
 
 	if (props.font instanceof DataSource) {
@@ -31,7 +35,7 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 			if (result.renderedState) {
 				result.renderedState.lines = [];
 			}
-		});
+		}, api.cancellationToken);
 	}
 
 	if (props.fontWeight instanceof DataSource) {
@@ -39,7 +43,7 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 			if (result.renderedState) {
 				result.renderedState.lines = [];
 			}
-		});
+		}, api.cancellationToken);
 	}
 
 	if (props.fontSize instanceof DataSource) {
@@ -47,7 +51,15 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 			if (result.renderedState) {
 				result.renderedState.lines = [];
 			}
-		});
+		}, api.cancellationToken);
+	}
+
+	if (props.width instanceof DataSource) {
+		props.width.listen(() => {
+			if (result.renderedState) {
+				result.renderedState.lines = [];
+			}
+		}, api.cancellationToken);
 	}
 
 	if (props.wrapWidth instanceof DataSource) {
@@ -55,12 +67,12 @@ export function AurumText(props: AurumTexteProps, children: Renderable[], api: A
 			if (result.renderedState) {
 				result.renderedState.lines = [];
 			}
-		});
+		}, api.cancellationToken);
 	}
 
 	for (const i of content as Array<string | ReadOnlyDataSource<string>>) {
 		if (i instanceof DataSource) {
-			i.transform(dsUnique()).listen((v) => {
+			i.transform(dsUnique(), api.cancellationToken).listen((v) => {
 				if (result.renderedState) {
 					result.renderedState.lines = [];
 				}

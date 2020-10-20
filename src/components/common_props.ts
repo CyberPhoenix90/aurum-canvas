@@ -1,5 +1,5 @@
 import { DataSource } from 'aurumjs';
-import { ComponentModel } from './component_model';
+import { ComponentModel, RenderData } from './component_model';
 
 export interface CommonProps extends InteractionProps {
 	state?: string | DataSource<string>;
@@ -12,6 +12,7 @@ export interface CommonProps extends InteractionProps {
 	fillColor?: string | DataSource<string>;
 	opacity?: number | DataSource<number>;
 	rotation?: number | DataSource<number>;
+	onPreDraw?(props: RenderData);
 }
 
 export interface InteractionProps {

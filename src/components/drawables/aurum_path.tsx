@@ -1,4 +1,4 @@
-import { DataSource, Renderable, AurumComponentAPI } from 'aurumjs';
+import { DataSource, Renderable, AurumComponentAPI, createLifeCycle } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
 import { CommonProps } from '../common_props';
 
@@ -16,7 +16,10 @@ export interface PathComponentModel extends ComponentModel {
 }
 
 export function AurumPath(props: AurumPathProps, children: Renderable[], api: AurumComponentAPI): PathComponentModel {
-	const components = api.prerender(children).filter((c) => !!c);
+	const lc = createLifeCycle();
+	api.synchronizeLifeCycle(lc);
+
+	const components = api.prerender(children, lc).filter((c) => !!c);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

@@ -1,4 +1,4 @@
-import { AurumComponentAPI, DataSource, Renderable } from 'aurumjs';
+import { AurumComponentAPI, createLifeCycle, DataSource, Renderable } from 'aurumjs';
 import { CommonProps } from '../common_props';
 import { ComponentModel, ComponentType } from '../component_model';
 
@@ -16,7 +16,10 @@ export interface RectangleComponentModel extends ComponentModel {
 }
 
 export function AurumRectangle(props: AurumRectangleProps, children: Renderable[], api: AurumComponentAPI): RectangleComponentModel {
-	const components = api.prerender(children).filter((c) => !!c);
+	const lc = createLifeCycle();
+	api.synchronizeLifeCycle(lc);
+
+	const components = api.prerender(children, lc).filter((c) => !!c);
 	return {
 		...props,
 		opacity: props.opacity ?? 1,

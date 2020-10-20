@@ -2,22 +2,30 @@ import { AurumComponentAPI, createLifeCycle, DataSource, Renderable } from 'auru
 import { CommonProps } from '../common_props';
 import { ComponentModel, ComponentType } from '../component_model';
 
-export interface AurumLineProps extends CommonProps {
+export interface AurumBezierCurveProps extends CommonProps {
 	tx: number | DataSource<number>;
 	ty: number | DataSource<number>;
+	cx: number | DataSource<number>;
+	cy: number | DataSource<number>;
+	c2x: number | DataSource<number>;
+	c2y: number | DataSource<number>;
 	lineWidth?: number | DataSource<number>;
 }
 
-export interface LineComponentModel extends ComponentModel {
+export interface BezierCurveComponentModel extends ComponentModel {
 	strokeColor?: string | DataSource<string>;
 	fillColor?: string | DataSource<string>;
 	opacity?: number | DataSource<number>;
+	cx: number | DataSource<number>;
+	cy: number | DataSource<number>;
+	c2x: number | DataSource<number>;
+	c2y: number | DataSource<number>;
 	tx: number | DataSource<number>;
 	ty: number | DataSource<number>;
 	lineWidth?: number | DataSource<number>;
 }
 
-export function AurumLine(props: AurumLineProps, children: Renderable[], api: AurumComponentAPI): LineComponentModel {
+export function AurumBezierCurve(props: AurumBezierCurveProps, children: Renderable[], api: AurumComponentAPI): BezierCurveComponentModel {
 	const lc = createLifeCycle();
 	api.synchronizeLifeCycle(lc);
 
@@ -29,6 +37,6 @@ export function AurumLine(props: AurumLineProps, children: Renderable[], api: Au
 		renderedState: undefined,
 		children: components as any,
 		animations: [],
-		type: ComponentType.LINE
+		type: ComponentType.BEZIER_CURVE
 	};
 }

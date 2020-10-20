@@ -1,4 +1,4 @@
-import { DataSource, AurumComponentAPI, Renderable } from 'aurumjs';
+import { DataSource, AurumComponentAPI, Renderable, createLifeCycle } from 'aurumjs';
 import { ComponentModel, ComponentType } from '../component_model';
 import { InteractionProps } from '../common_props';
 
@@ -11,7 +11,10 @@ export interface AurumGroupProps extends InteractionProps {
 export interface GroupComponentModel extends ComponentModel {}
 
 export function AurumGroup(props: AurumGroupProps, children: Renderable[], api: AurumComponentAPI): GroupComponentModel {
-	const components = api.prerender(children).filter((c) => !!c);
+	const lc = createLifeCycle();
+	api.synchronizeLifeCycle(lc);
+
+	const components = api.prerender(children, lc).filter((c) => !!c);
 	return {
 		...props,
 		renderedState: undefined,

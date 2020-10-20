@@ -13,6 +13,7 @@ export interface ComponentModel extends InteractionProps {
 	animationTime?: number;
 	animations: StateComponentModel[];
 	renderedState: RenderData;
+	onPreDraw?(props: RenderData);
 }
 
 export interface RenderData {
@@ -44,5 +45,7 @@ export enum ComponentType {
 	IMAGE,
 	GROUP,
 	STATE,
-	PATH
+	PATH,
+	QUADRATIC_CURVE,
+	BEZIER_CURVE
 }

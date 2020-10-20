@@ -37,6 +37,6 @@
 		"typescript": "^3.7.2"
 	},
 	"dependencies": {
-		"aurumjs": "^0.5.25"
+		"aurumjs": "^0.5.35"
 	}
 }
