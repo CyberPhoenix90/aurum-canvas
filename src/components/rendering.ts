@@ -9,13 +9,31 @@ import { deref } from './utilities';
 import { ComponentModel } from './component_model';
 import { CommonProps } from './common_props';
 
+const pathKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth', 'originX', 'originY'];
+const elipseKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'rotation', 'rx', 'ry', 'startAngle', 'endAngle', 'originX', 'originY'];
+const lineKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'lineWidth', 'originX', 'originY'];
+const quadraticCurveKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'cx', 'cy', 'lineWidth', 'originX', 'originY'];
+const bezierCurveKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'cx', 'cy', 'c2x', 'c2y', 'lineWidth', 'originX', 'originY'];
+const textKeys = [
+	'x',
+	'y',
+	'width',
+	'font',
+	'fontSize',
+	'opacity',
+	'strokeColor',
+	'fillColor',
+	'text',
+	'fontWeight',
+	'wrapWidth',
+	'lineHeight',
+	'originX',
+	'originY'
+];
+const rectangleKeys = ['x', 'y', 'width', 'height', 'opacity', 'strokeColor', 'fillColor', 'originX', 'originY'];
+
 export function renderElipse(context: CanvasRenderingContext2D, child: ElipseComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(
-		child,
-		['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'rotation', 'rx', 'ry', 'startAngle', 'endAngle', 'originX', 'originY'],
-		offsetX,
-		offsetY
-	);
+	const renderedState = resolveValues(child, elipseKeys, offsetX, offsetY);
 	const { x, y, idle, fillColor, strokeColor, opacity, rx, ry, rotation, startAngle, endAngle } = renderedState;
 	child.renderedState = renderedState;
 
@@ -33,12 +51,7 @@ export function renderElipse(context: CanvasRenderingContext2D, child: ElipseCom
 }
 
 export function renderLine(context: CanvasRenderingContext2D, child: LineComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(
-		child,
-		['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'lineWidth', 'originX', 'originY'],
-		offsetX,
-		offsetY
-	);
+	const renderedState = resolveValues(child, lineKeys, offsetX, offsetY);
 	const { x, y, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
 	child.renderedState = renderedState;
 	child.onPreDraw?.(child.renderedState);
@@ -57,12 +70,7 @@ export function renderLine(context: CanvasRenderingContext2D, child: LineCompone
 }
 
 export function renderQuadraticCurve(context: CanvasRenderingContext2D, child: QuadraticCurveComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(
-		child,
-		['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'cx', 'cy', 'lineWidth', 'originX', 'originY'],
-		offsetX,
-		offsetY
-	);
+	const renderedState = resolveValues(child, quadraticCurveKeys, offsetX, offsetY);
 	const { x, y, cx, cy, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
 	child.renderedState = renderedState;
 	child.onPreDraw?.(child.renderedState);
@@ -81,12 +89,7 @@ export function renderQuadraticCurve(context: CanvasRenderingContext2D, child: Q
 }
 
 export function renderBezierCurve(context: CanvasRenderingContext2D, child: BezierCurveComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(
-		child,
-		['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'cx', 'cy', 'c2x', 'c2y', 'lineWidth', 'originX', 'originY'],
-		offsetX,
-		offsetY
-	);
+	const renderedState = resolveValues(child, bezierCurveKeys, offsetX, offsetY);
 	const { x, y, cx, cy, c2x, c2y, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
 	child.renderedState = renderedState;
 	child.onPreDraw?.(child.renderedState);
@@ -120,7 +123,7 @@ function drawCanvasPath(child: CommonProps, context: CanvasRenderingContext2D, f
 }
 
 export function renderPath(context: CanvasRenderingContext2D, child: PathComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(child, ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth', 'originX', 'originY'], offsetX, offsetY);
+	const renderedState = resolveValues(child, pathKeys, offsetX, offsetY);
 	const { x, y, idle, fillColor, strokeColor, opacity, path, lineWidth } = renderedState;
 	child.renderedState = renderedState;
 	child.onPreDraw?.(child.renderedState);
@@ -155,12 +158,7 @@ export function renderPath(context: CanvasRenderingContext2D, child: PathCompone
 }
 
 export function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(
-		child,
-		['x', 'y', 'width', 'font', 'fontSize', 'opacity', 'strokeColor', 'fillColor', 'text', 'fontWeight', 'wrapWidth', 'lineHeight', 'originX', 'originY'],
-		offsetX,
-		offsetY
-	);
+	const renderedState = resolveValues(child, textKeys, offsetX, offsetY);
 	let { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text, fontWeight, width, wrapWidth, lineHeight, originX } = renderedState;
 
 	if (child.renderedState?.width && !renderedState.width) {
@@ -218,11 +216,16 @@ export function renderText(context: CanvasRenderingContext2D, child: TextCompone
 }
 
 export function renderRectangle(context: CanvasRenderingContext2D, child: RectangleComponentModel, offsetX: number, offsetY: number): boolean {
-	const renderedState = resolveValues(child, ['x', 'y', 'width', 'height', 'opacity', 'strokeColor', 'fillColor', 'originX', 'originY'], offsetX, offsetY);
+	const renderedState = resolveValues(child, rectangleKeys, offsetX, offsetY);
 	const { x, y, width, height, idle, fillColor, strokeColor, opacity } = renderedState;
 	child.renderedState = renderedState;
 
 	child.onPreDraw?.(child.renderedState);
+
+	if (opacity <= 0 && !child.clip) {
+		return idle;
+	}
+
 	context.globalAlpha = opacity;
 
 	if (fillColor) {

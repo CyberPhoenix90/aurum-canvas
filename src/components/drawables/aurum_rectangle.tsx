@@ -8,8 +8,8 @@ export interface AurumRectangleProps extends CommonProps {
 }
 
 export interface RectangleComponentModel extends ComponentModel {
-	strokeColor?: string | DataSource<string>;
-	fillColor?: string | DataSource<string>;
+	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
+	fillColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	opacity?: number | DataSource<number>;
 	width: number | DataSource<number>;
 	height: number | DataSource<number>;

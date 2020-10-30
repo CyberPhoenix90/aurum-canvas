@@ -15,9 +15,9 @@ export interface TextComponentModel extends ComponentModel {
 	text: string | DataSource<string>;
 	font?: string | DataSource<string>;
 	fontSize?: number | DataSource<number>;
-	strokeColor?: string | DataSource<string>;
+	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	fontWeight?: string | DataSource<string>;
-	fillColor?: string | DataSource<string>;
+	fillColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	opacity?: number | DataSource<number>;
 	wrapWidth?: number | DataSource<number>;
 	lineHeight?: number | DataSource<number>;

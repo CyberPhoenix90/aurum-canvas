@@ -8,8 +8,8 @@ export interface CommonProps extends InteractionProps {
 	originY?: number | DataSource<number>;
 	x: number | DataSource<number>;
 	y: number | DataSource<number>;
-	strokeColor?: string | DataSource<string>;
-	fillColor?: string | DataSource<string>;
+	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
+	fillColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	opacity?: number | DataSource<number>;
 	rotation?: number | DataSource<number>;
 	onPreDraw?(props: RenderData);

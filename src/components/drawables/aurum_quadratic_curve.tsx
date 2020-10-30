@@ -11,8 +11,8 @@ export interface AurumQuadraticCurveProps extends CommonProps {
 }
 
 export interface QuadraticCurveComponentModel extends ComponentModel {
-	strokeColor?: string | DataSource<string>;
-	fillColor?: string | DataSource<string>;
+	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
+	fillColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	opacity?: number | DataSource<number>;
 	cx: number | DataSource<number>;
 	cy: number | DataSource<number>;

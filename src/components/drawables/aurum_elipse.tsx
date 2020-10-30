@@ -10,8 +10,8 @@ export interface AurumElipseProps extends CommonProps {
 }
 
 export interface ElipseComponentModel extends ComponentModel {
-	strokeColor?: string | DataSource<string>;
-	fillColor?: string | DataSource<string>;
+	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
+	fillColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	opacity?: number | DataSource<number>;
 	rx: number | DataSource<number>;
 	ry: number | DataSource<number>;

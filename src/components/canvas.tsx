@@ -253,6 +253,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 
 	function render(canvas: HTMLCanvasElement, components: ComponentModel[]): void {
 		const context = canvas.getContext('2d');
+		context.createLinearGradient
 		if (props.backgroundColor === undefined) {
 			context.clearRect(0, 0, canvas.width, canvas.height);
 		} else {
