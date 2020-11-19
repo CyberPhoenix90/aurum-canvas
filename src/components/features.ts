@@ -96,8 +96,8 @@ export function initializeZoomFeature(props: AurumCanvasProps, canvas: HTMLCanva
 			}
 
 			props.translate.update({
-				x: props.translate.value.x + (e.clientX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
-				y: props.translate.value.y + (e.clientY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
+				x: props.translate.value.x + (e.offsetX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
+				y: props.translate.value.y + (e.offsetY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
 			});
 			props.scale.update({
 				x: props.scale.value.x / props.features.mouseWheelZoom.zoomIncrements,
@@ -113,8 +113,8 @@ export function initializeZoomFeature(props: AurumCanvasProps, canvas: HTMLCanva
 				y: props.scale.value.y * props.features.mouseWheelZoom.zoomIncrements
 			});
 			props.translate.update({
-				x: props.translate.value.x - (e.clientX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
-				y: props.translate.value.y - (e.clientY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
+				x: props.translate.value.x - (e.offsetX * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.x,
+				y: props.translate.value.y - (e.offsetY * (props.features.mouseWheelZoom.zoomIncrements - 1)) / props.scale.value.y
 			});
 		}
 	});

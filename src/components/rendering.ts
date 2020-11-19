@@ -9,6 +9,7 @@ import { deref } from './utilities';
 import { ComponentModel } from './component_model';
 import { CommonProps } from './common_props';
 
+const regularPolygonKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'sides', 'radius', 'originX', 'originY'];
 const pathKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'path', 'lineWidth', 'originX', 'originY'];
 const elipseKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'rotation', 'rx', 'ry', 'startAngle', 'endAngle', 'originX', 'originY'];
 const lineKeys = ['x', 'y', 'opacity', 'strokeColor', 'fillColor', 'tx', 'ty', 'lineWidth', 'originX', 'originY'];
@@ -27,6 +28,7 @@ const textKeys = [
 	'fontWeight',
 	'wrapWidth',
 	'lineHeight',
+	'textBaseline',
 	'originX',
 	'originY'
 ];
@@ -172,9 +174,45 @@ export function renderPath(context: CanvasRenderingContext2D, child: PathCompone
 	return idle;
 }
 
+export function renderRegularPolygon(context: CanvasRenderingContext2D, child: PathComponentModel, offsetX: number, offsetY: number): boolean {
+	const renderedState = resolveValues(child, regularPolygonKeys, offsetX, offsetY);
+	const { x, y, idle, fillColor, strokeColor, opacity, sides, radius } = renderedState;
+	child.renderedState = renderedState;
+
+	child.onPreDraw?.(child.renderedState);
+	context.globalAlpha = opacity;
+
+	if (renderedState.sides < 3) {
+		return idle;
+	}
+	const path2d = new Path2D();
+
+	if (fillColor || strokeColor) {
+		let angle = 0;
+		for (let i = 0; i < sides; i++) {
+			angle += Math.PI / (sides / 2);
+			const targetX = radius * Math.cos(angle);
+			const targetY = radius * Math.sin(angle);
+			if (i === 0) {
+				path2d.moveTo(targetX + radius + x, targetY + radius + y);
+			} else {
+				path2d.lineTo(targetX + radius + x, targetY + radius + y);
+			}
+		}
+
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
+	}
+
+	drawCanvasPath(child, context, path2d, fillColor, strokeColor);
+
+	return idle;
+}
+
 export function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number): boolean {
 	const renderedState = resolveValues(child, textKeys, offsetX, offsetY);
-	let { x, y, idle, fontSize, font, fillColor, strokeColor, opacity, text, fontWeight, width, wrapWidth, lineHeight, originX } = renderedState;
+	let { x, y, idle, fontSize, textBaseline, font, fillColor, strokeColor, opacity, text, fontWeight, width, wrapWidth, lineHeight, originX } = renderedState;
 
 	if (child.renderedState?.width && !renderedState.width) {
 		renderedState.width = child.renderedState.width;
@@ -185,6 +223,9 @@ export function renderText(context: CanvasRenderingContext2D, child: TextCompone
 
 	child.renderedState.lines = child.renderedState.lines ?? [];
 	let lines = child.renderedState.lines;
+	if (textBaseline) {
+		context.textBaseline = textBaseline;
+	}
 	context.font = `${fontWeight ? fontWeight + ' ' : ''}${fontSize}px ${font ?? 'Arial'}`;
 
 	if (lines.length === 0) {

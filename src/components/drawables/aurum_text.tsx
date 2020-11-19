@@ -8,12 +8,14 @@ export interface AurumTexteProps extends CommonProps {
 	fontWeight?: string | DataSource<string>;
 	width?: number | DataSource<number>;
 	wrapWidth?: number | DataSource<number>;
+	textBaseline?: string | DataSource<string>;
 	lineHeight?: number | DataSource<number>;
 }
 
 export interface TextComponentModel extends ComponentModel {
 	text: string | DataSource<string>;
 	font?: string | DataSource<string>;
+	textBaseline?: string | DataSource<string>;
 	fontSize?: number | DataSource<number>;
 	strokeColor?: string | DataSource<string> | CanvasGradient | DataSource<CanvasGradient>;
 	fontWeight?: string | DataSource<string>;

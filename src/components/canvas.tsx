@@ -22,7 +22,7 @@ import { PathComponentModel } from './drawables/aurum_path';
 import { QuadraticCurveComponentModel } from './drawables/aurum_quadratic_curve';
 import { BezierCurveComponentModel } from './drawables/aurum_bezier_curve';
 import { deref } from './utilities';
-import { renderPath, renderRectangle, renderText, renderLine, renderQuadraticCurve, renderBezierCurve, renderElipse } from './rendering';
+import { renderPath, renderRectangle, renderText, renderLine, renderQuadraticCurve, renderBezierCurve, renderElipse, renderRegularPolygon } from './rendering';
 import { initializeKeyboardPanningFeature, initializeMousePanningFeature, initializeZoomFeature } from './features';
 
 export interface AurumnCanvasFeatures {
@@ -155,21 +155,31 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 		if (!target.renderedState) {
 			return;
 		}
+		const x = e.offsetX - props.translate?.value.x ?? 0;
+		const y = e.offsetY - props.translate?.value.y ?? 0;
+
 		switch (target.type) {
 			case ComponentType.IMAGE:
 			case ComponentType.RECTANGLE:
 			case ComponentType.TEXT:
 				return (
-					e.offsetX >= target.renderedState.x &&
-					e.offsetY >= target.renderedState.y &&
-					e.offsetX <= target.renderedState.x + target.renderedState.width &&
-					e.offsetY <= target.renderedState.y + target.renderedState.height
+					x >= target.renderedState.x &&
+					y >= target.renderedState.y &&
+					x <= target.renderedState.x + target.renderedState.width * (props.scale?.value.x ?? 1) &&
+					y <= target.renderedState.y + target.renderedState.height * (props.scale?.value.y ?? 1)
 				);
+			case ComponentType.ELIPSE:
+			case ComponentType.REGULAR_POLYGON:
+				if (!target.renderedState.path) {
+					return false;
+				} else {
+					return context.isPointInPath(target.renderedState.path, x, y);
+				}
 			default:
 				if (!target.renderedState.path) {
 					return false;
 				} else {
-					return context.isPointInPath(target.renderedState.path, e.offsetX, e.offsetY);
+					return context.isPointInPath(target.renderedState.path, x - target.renderedState.x, y - target.renderedState.y);
 				}
 		}
 	}
@@ -363,6 +373,9 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 		switch (child.type) {
 			case ComponentType.PATH:
 				idle = renderPath(context, child as PathComponentModel, offsetX, offsetY);
+				break;
+			case ComponentType.REGULAR_POLYGON:
+				idle = renderRegularPolygon(context, child as PathComponentModel, offsetX, offsetY);
 				break;
 			case ComponentType.RECTANGLE:
 				idle = renderRectangle(context, child as RectangleComponentModel, offsetX, offsetY);

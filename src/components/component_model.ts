@@ -12,11 +12,12 @@ export interface ComponentModel extends InteractionProps {
 	animationStates?: StateComponentModel[];
 	animationTime?: number;
 	animations: StateComponentModel[];
-	renderedState: RenderData;
+	renderedState?: RenderData;
 	onPreDraw?(props: RenderData);
 }
 
 export interface RenderData {
+	radius: number;
 	path: Path2D;
 	lines: string[];
 	x: number;
@@ -48,5 +49,6 @@ export enum ComponentType {
 	STATE,
 	PATH,
 	QUADRATIC_CURVE,
-	BEZIER_CURVE
+	BEZIER_CURVE,
+	REGULAR_POLYGON
 }

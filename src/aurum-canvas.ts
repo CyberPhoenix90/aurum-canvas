@@ -6,3 +6,4 @@ export * from './components/drawables/aurum_elipse';
 export * from './components/drawables/aurum_group';
 export * from './components/drawables/aurum_path';
 export * from './components/drawables/state';
+export * from './components/drawables/aurum_regular_polygon';

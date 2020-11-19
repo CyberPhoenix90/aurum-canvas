@@ -1,6 +1,6 @@
 {
 	"name": "aurum-canvas",
-	"version": "0.0.16",
+	"version": "0.0.17",
 	"description": "Aurum style scene graph management for rendering in canvas",
 	"main": "prebuilt/cjs/aurum-canvas.js",
 	"typings": "prebuilt/esnext/aurum-canvas.d.ts",
@@ -38,6 +38,6 @@
 		"typescript": "^3.7.2"
 	},
 	"dependencies": {
-		"aurumjs": "^0.5.35"
+		"aurumjs": "^0.5.47"
 	}
 }
