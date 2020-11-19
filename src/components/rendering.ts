@@ -39,13 +39,16 @@ export function renderElipse(context: CanvasRenderingContext2D, child: ElipseCom
 
 	child.onPreDraw?.(child.renderedState);
 	context.globalAlpha = opacity;
+	const path2d = new Path2D();
 
 	if (fillColor || strokeColor) {
-		context.beginPath();
-		context.ellipse(x, y, rx, ry, rotation ?? 0, startAngle ?? 0, endAngle ?? Math.PI * 2);
+		path2d.ellipse(x, y, rx, ry, rotation ?? 0, startAngle ?? 0, endAngle ?? Math.PI * 2);
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
 	}
 
-	drawCanvasPath(child, context, fillColor, strokeColor);
+	drawCanvasPath(child, context, path2d, fillColor, strokeColor);
 
 	return idle;
 }
@@ -55,16 +58,19 @@ export function renderLine(context: CanvasRenderingContext2D, child: LineCompone
 	const { x, y, idle, fillColor, strokeColor, opacity, tx, ty, lineWidth } = renderedState;
 	child.renderedState = renderedState;
 	child.onPreDraw?.(child.renderedState);
+	const path2d = new Path2D();
 
 	context.globalAlpha = opacity;
 	if (fillColor || strokeColor) {
-		context.beginPath();
-		context.moveTo(x, y);
-		context.lineTo(tx, ty);
+		path2d.moveTo(x, y);
+		path2d.lineTo(tx, ty);
 		context.lineWidth = lineWidth;
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
 	}
 
-	drawCanvasPath(child, context, fillColor, strokeColor);
+	drawCanvasPath(child, context, path2d, fillColor, strokeColor);
 
 	return idle;
 }
@@ -76,14 +82,17 @@ export function renderQuadraticCurve(context: CanvasRenderingContext2D, child: Q
 	child.onPreDraw?.(child.renderedState);
 
 	context.globalAlpha = opacity;
+	const path2d = new Path2D();
 	if (fillColor || strokeColor) {
-		context.beginPath();
-		context.moveTo(x, y);
-		context.quadraticCurveTo(cx, cy, tx, ty);
+		path2d.moveTo(x, y);
+		path2d.quadraticCurveTo(cx, cy, tx, ty);
 		context.lineWidth = lineWidth;
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
 	}
 
-	drawCanvasPath(child, context, fillColor, strokeColor);
+	drawCanvasPath(child, context, path2d, fillColor, strokeColor);
 
 	return idle;
 }
@@ -95,30 +104,33 @@ export function renderBezierCurve(context: CanvasRenderingContext2D, child: Bezi
 	child.onPreDraw?.(child.renderedState);
 
 	context.globalAlpha = opacity;
+	const path2d = new Path2D();
 	if (fillColor || strokeColor) {
-		context.beginPath();
-		context.moveTo(x, y);
-		context.bezierCurveTo(cx, cy, c2x, c2y, tx, ty);
+		path2d.moveTo(x, y);
+		path2d.bezierCurveTo(cx, cy, c2x, c2y, tx, ty);
 		context.lineWidth = lineWidth;
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
 	}
 
-	drawCanvasPath(child, context, fillColor, strokeColor);
+	drawCanvasPath(child, context, path2d, fillColor, strokeColor);
 
 	return idle;
 }
 
-function drawCanvasPath(child: CommonProps, context: CanvasRenderingContext2D, fillColor: any, strokeColor: any) {
+function drawCanvasPath(child: CommonProps, context: CanvasRenderingContext2D, path2d: Path2D, fillColor: any, strokeColor: any) {
 	if (child.fillColor) {
 		context.fillStyle = fillColor;
-		context.fill();
+		context.fill(path2d);
 	}
 	if (child.strokeColor) {
 		context.strokeStyle = strokeColor;
-		context.stroke();
+		context.stroke(path2d);
 	}
 
 	if (child.clip) {
-		context.clip();
+		context.clip(path2d);
 	}
 }
 
@@ -133,6 +145,9 @@ export function renderPath(context: CanvasRenderingContext2D, child: PathCompone
 	if (fillColor || strokeColor) {
 		context.lineWidth = lineWidth;
 		path2d = new Path2D(path);
+		child.renderedState.path = path2d;
+	} else {
+		child.renderedState.path = undefined;
 	}
 
 	if (child.fillColor) {

@@ -17,6 +17,7 @@ export interface ComponentModel extends InteractionProps {
 }
 
 export interface RenderData {
+	path: Path2D;
 	lines: string[];
 	x: number;
 	y: number;

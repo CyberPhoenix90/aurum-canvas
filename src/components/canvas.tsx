@@ -112,8 +112,8 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 					}, api.cancellationToken);
 				}
 
-				bindCanvas(canvas, components as any, cancellationToken);
-				render(canvas, components as any);
+				bindCanvas(canvas, components, cancellationToken);
+				render(canvas, components);
 				if (props.translate) {
 					props.translate.transform(dsUnique(), api.cancellationToken).listen((v) => {
 						invalidate(canvas);
@@ -148,10 +148,10 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 			onMouseUp.fire(e as MouseEvent);
 		});
 
-		bind(canvas, components, components, undefined, cancellationToken);
+		bind(canvas, components, undefined, cancellationToken);
 	}
 
-	function isOnTopOf(e: MouseEvent, target: ComponentModel): boolean {
+	function isOnTopOf(e: MouseEvent, target: ComponentModel, context: CanvasRenderingContext2D): boolean {
 		if (!target.renderedState) {
 			return;
 		}
@@ -165,20 +165,40 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 					e.offsetX <= target.renderedState.x + target.renderedState.width &&
 					e.offsetY <= target.renderedState.y + target.renderedState.height
 				);
+			default:
+				if (!target.renderedState.path) {
+					return false;
+				} else {
+					return context.isPointInPath(target.renderedState.path, e.offsetX, e.offsetY);
+				}
 		}
 	}
 
-	function bind(
-		canvas: HTMLCanvasElement,
-		components: ComponentModel[],
-		children: ComponentModel[],
-		parent: ComponentModel,
-		cancellationToken: CancellationToken
-	): void {
+	function bind(canvas: HTMLCanvasElement, children: ComponentModel[], parent: ComponentModel, cancellationToken: CancellationToken): void {
 		for (const child of children) {
 			if (child instanceof ArrayDataSource || child instanceof DataSource || child instanceof DuplexDataSource) {
-				child.listen(() => {
-					invalidate(canvas);
+				let bindToken: CancellationToken;
+				let value;
+				child.listenAndRepeat((newValue) => {
+					if (value !== newValue) {
+						value = newValue;
+						if (bindToken) {
+							bindToken.cancel();
+						}
+						bindToken = new CancellationToken();
+						const arrayedValue = Array.isArray(value) ? value : [value];
+
+						const renderResult = [];
+						for (const piece of arrayedValue) {
+							if (!renderCache.has(piece)) {
+								renderCache.set(piece, api.prerender(piece, lc));
+							}
+							renderResult.push(renderCache.get(piece));
+						}
+
+						bind(canvas, renderResult, child, bindToken);
+						invalidate(canvas);
+					}
 				});
 				continue;
 			}
@@ -190,22 +210,48 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 				parent.animations.push(child as StateComponentModel);
 				continue;
 			}
+			if ('onMouseEnter' in child || 'onMouseLeave' in child) {
+				let isInside = false;
+				onMouseMove.subscribe((e) => {
+					if (isOnTopOf(e, child, canvas.getContext('2d'))) {
+						if (!isInside && child.onMouseEnter) {
+							child.onMouseEnter(e, child);
+						}
+						isInside = true;
+					} else {
+						if (isInside && child.onMouseLeave) {
+							child.onMouseLeave(e, child);
+						}
+						isInside = false;
+					}
+				}, cancellationToken);
+			}
 
 			for (const key in child) {
 				if (key === 'onMouseUp') {
 					onMouseUp.subscribe((e) => {
-						if (isOnTopOf(e, child)) {
+						if (isOnTopOf(e, child, canvas.getContext('2d'))) {
 							child.onMouseUp(e, child);
 						}
-					});
+					}, cancellationToken);
 					continue;
 				}
+
 				if (key === 'onMouseDown') {
-					onMouseDown.subscribe((e) => {
-						if (isOnTopOf(e, child)) {
-							child.onMouseDown(e, child);
+					onMouseUp.subscribe((e) => {
+						if (isOnTopOf(e, child, canvas.getContext('2d'))) {
+							child.onMouseUp(e, child);
 						}
-					});
+					}, cancellationToken);
+					continue;
+				}
+
+				if (key === 'onMouseClick') {
+					onMouseUp.subscribe((e) => {
+						if (isOnTopOf(e, child, canvas.getContext('2d'))) {
+							child.onMouseClick(e, child);
+						}
+					}, cancellationToken);
 					continue;
 				}
 
@@ -236,7 +282,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 					}, cancellationToken);
 				}
 			}
-			bind(canvas, components, child.children, child, cancellationToken);
+			bind(canvas, child.children, child, cancellationToken);
 		}
 	}
 
@@ -253,7 +299,6 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 
 	function render(canvas: HTMLCanvasElement, components: ComponentModel[]): void {
 		const context = canvas.getContext('2d');
-		context.createLinearGradient
 		if (props.backgroundColor === undefined) {
 			context.clearRect(0, 0, canvas.width, canvas.height);
 		} else {
@@ -295,7 +340,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 
 		if (child[aurumElementModelIdentitiy]) {
 			if (!renderCache.has(child)) {
-				renderCache.set(child, api.prerender(child as any, lc));
+				throw new Error('illegal state: unrendered aurum element made it into the canvas render phase');
 			}
 			child = renderCache.get(child);
 		}
