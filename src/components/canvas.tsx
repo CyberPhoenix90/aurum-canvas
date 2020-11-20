@@ -119,7 +119,7 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 						invalidate(canvas);
 					});
 				}
-				if (props.translate) {
+				if (props.scale) {
 					props.scale.transform(dsUnique(), api.cancellationToken).listen((v) => {
 						invalidate(canvas);
 					});
@@ -155,8 +155,8 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 		if (!target.renderedState) {
 			return;
 		}
-		const x = e.offsetX - props.translate?.value.x ?? 0;
-		const y = e.offsetY - props.translate?.value.y ?? 0;
+		const x = e.offsetX - (props.translate?.value.x ?? 0);
+		const y = e.offsetY - (props.translate?.value.y ?? 0);
 
 		switch (target.type) {
 			case ComponentType.IMAGE:
@@ -356,14 +356,14 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 		}
 		if (child instanceof ArrayDataSource) {
 			for (const node of child.getData()) {
-				renderChild(context, node, offsetY, offsetY);
+				renderChild(context, node, offsetX, offsetY);
 			}
 			child.listen(() => invalidate(context.canvas));
 			return;
 		}
 
 		if (child instanceof DataSource || child instanceof DuplexDataSource) {
-			renderChild(context, child.value, offsetY, offsetY);
+			renderChild(context, child.value, offsetX, offsetY);
 			child.listen(() => invalidate(context.canvas));
 			return;
 		}
