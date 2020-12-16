@@ -156,7 +156,27 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 			return;
 		}
 		const x = e.offsetX - (props.translate?.value.x ?? 0);
-		const y = e.offsetY - (props.translate?.value.y ?? 0);
+		let y = e.offsetY - (props.translate?.value.y ?? 0);
+
+		if (target.type === ComponentType.TEXT) {
+			const label = target as TextComponentModel;
+			const size = deref(label.fontSize) ?? 16;
+			if (!label.textBaseline) {
+				y += size;
+			} else {
+				switch (label.textBaseline) {
+					case 'bottom':
+						y += size;
+						break;
+					case 'middle':
+						y += size / 2;
+						break;
+					case 'alphabetic':
+						y += size;
+						break;
+				}
+			}
+		}
 
 		switch (target.type) {
 			case ComponentType.IMAGE:

@@ -212,7 +212,23 @@ export function renderRegularPolygon(context: CanvasRenderingContext2D, child: P
 
 export function renderText(context: CanvasRenderingContext2D, child: TextComponentModel, offsetX: number, offsetY: number): boolean {
 	const renderedState = resolveValues(child, textKeys, offsetX, offsetY);
-	let { x, y, idle, fontSize, textBaseline, font, fillColor, strokeColor, opacity, text, fontWeight, width, wrapWidth, lineHeight, originX } = renderedState;
+	let {
+		x,
+		y,
+		idle,
+		fontSize = 16,
+		textBaseline,
+		font,
+		fillColor,
+		strokeColor,
+		opacity,
+		text,
+		fontWeight,
+		width,
+		wrapWidth,
+		lineHeight,
+		originX
+	} = renderedState;
 
 	if (child.renderedState?.width && !renderedState.width) {
 		renderedState.width = child.renderedState.width;
@@ -227,7 +243,7 @@ export function renderText(context: CanvasRenderingContext2D, child: TextCompone
 		context.textBaseline = textBaseline;
 	}
 	context.font = `${fontWeight ? fontWeight + ' ' : ''}${fontSize}px ${font ?? 'Arial'}`;
-
+	renderedState.height = fontSize;
 	if (lines.length === 0) {
 		if (wrapWidth) {
 			const pieces: string[] = text.split(' ');
