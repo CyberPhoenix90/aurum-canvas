@@ -138,6 +138,9 @@ export function AurumCanvas(props: AurumCanvasProps, children: Renderable[], api
 	);
 
 	function bindCanvas(canvas: HTMLCanvasElement, components: ComponentModel[], cancellationToken: CancellationToken) {
+		cancellationToken.registerDomEvent(canvas, 'mouseleave', (e) => {
+			onMouseMove.fire(e as MouseEvent);
+		});
 		cancellationToken.registerDomEvent(canvas, 'mousemove', (e) => {
 			onMouseMove.fire(e as MouseEvent);
 		});
